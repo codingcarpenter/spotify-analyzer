@@ -17,7 +17,7 @@ async function getSpotifyCreds(key) {
     expiry: time.getTime() + parseInt(ttl),
   };
 
-  // Add to storagge
+  // Add to storage
   setStorage(key, item);
 
   return;
@@ -25,16 +25,20 @@ async function getSpotifyCreds(key) {
 
 export default function FetchUserData(key) {
   if (localStorage.getItem(key)) {
-    // Get parsed item from storage, return it as string
+    // Get string from LS and parse to JSON
     const userInfo = JSON.parse(localStorage.getItem("token"));
+    // Get current date to extract time and compare
     const currentDate = new Date();
     if (userInfo.expiry > currentDate.getTime()) {
+      // If not expired, return info
       return userInfo;
     } else {
+      // If expired get the creds from the URL string
       getSpotifyCreds(key);
       return localStorage.getItem("key");
     }
   } else if (window.location.hash.length > 0) {
+    // If LS hasn't been set, fetch the data from the URL and set it
     const token = getSpotifyCreds(key);
     return token;
   }
