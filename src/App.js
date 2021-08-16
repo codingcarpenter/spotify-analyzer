@@ -1,7 +1,9 @@
 import { useState } from "react";
-import FetchUserToken from "./FetchUserToken";
+// Components
 import AuthButton from "./Components/AuthButton";
-import FetchUserSongs from "./FetchUserData";
+import ListButton from "./Components/ListButton";
+// Functions
+import FetchUserToken from "./FetchUserToken";
 
 function App() {
   const user = FetchUserToken("token");
@@ -15,9 +17,7 @@ function App() {
   return (
     <div className="App">
       <AuthButton />
-      <button onClick={async () => updateInfo(await FetchUserSongs(user))}>
-        Click to get info
-      </button>
+      <ListButton user={user} updateInfo={updateInfo} />
       {typeof userInfo !== "undefined" && (
         <ul>
           {userInfo.map((song) => (
