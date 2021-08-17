@@ -1,17 +1,38 @@
 const spotUrl = "https://api.spotify.com/v1/me/tracks";
 
-export default async function spotCall(user, offset = 0) {
-  let response = await fetch(`${spotUrl}?limit=50&offset=${offset}`, {
-    headers: {
-      Authorization: `${user.token_type} ${user.token}`,
-    },
-  });
+export default async function spotCall(user) {
+  const authHeaders = {
+    headers: { Authorization: `${user.token_type} ${user.token}` },
+  };
 
-  if (!response.ok) {
-    throw new Error(`HTTP error, status: ${response.status}`);
+  const firstResponse = await fetch(
+    `${spotUrl}?limit=50&offset=0`,
+    authHeaders
+  );
+
+  if (!firstResponse.ok) {
+    throw new Error(`HTTP error, status: ${firstResponse.status}`);
   }
 
-  let userData = await response.json();
+  const firstCallData = await firstResponse.json();
 
-  return userData;
+  const numberOfCalls = Math.ceil(firstCallData.total / 50);
+
+  let urlArray = [];
+  for (let i = 1; i < numberOfCalls; i++) {
+    urlArray.push(`${spotUrl}?limit=50&offset=${i * 50}`);
+  }
+
+  const secondaryResponses = await Promise.all(
+    urlArray.map((url) =>
+      fetch(url, authHeaders).then((response) => response.json())
+    )
+  );
+
+  const finalResults = secondaryResponses.reduce(
+    (accu, response) => [...accu, ...response.items],
+    [...firstCallData.items]
+  );
+
+  return finalResults;
 }
