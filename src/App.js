@@ -4,13 +4,24 @@ import AuthButton from "./Components/AuthButton";
 import ListButton from "./Components/ListButton";
 // Functions
 import FetchUserToken from "./FetchUserToken";
+import FetchArtists from "./SpotifyArtistCall";
 
 function App() {
   const user = FetchUserToken("token");
-  const [userInfo, setUserInfo] = useState();
+  const [userSongs, setUserSongs] = useState();
+  let artistIDs = new Set();
 
   function updateInfo(data) {
-    setUserInfo(data);
+    setUserSongs(data);
+
+    let i = 0,
+      len = data.length;
+    while (i < len) {
+      artistIDs.add(data[i].track.artists[0].id);
+      i++;
+    }
+
+    FetchArtists(user, artistIDs);
     return;
   }
 
@@ -18,9 +29,9 @@ function App() {
     <div className="App">
       <AuthButton />
       <ListButton user={user} updateInfo={updateInfo} />
-      {typeof userInfo !== "undefined" && (
+      {typeof userSongs !== "undefined" && (
         <ul>
-          {userInfo.map((song) => (
+          {userSongs.map((song) => (
             <li key={song.track.id}>{song.track.name}</li>
           ))}
         </ul>
